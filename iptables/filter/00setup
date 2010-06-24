@@ -1,0 +1,59 @@
+-N LOGDROP
+-A LOGDROP -j LOG --log-prefix "LOGDROP "
+-A LOGDROP -j DROP 
+
+-N syn-sniffing
+-A syn-sniffing -m limit --limit 1/sec --limit-burst 4 -j RETURN 
+-A syn-sniffing -j DROP 
+
+# only accept tcp syn packets (connection will be conntracked later)
+# if this rule is used all other packages will be LOGDROPped
+-N syn-only
+-A syn-only -p tcp -m tcp --syn -j RETURN
+-A syn-only -j LOGDROP
+
+-N internal-to-external
+-A internal-to-external -s 10.0.0.100 -j ACCEPT
+-A internal-to-external -s 10.0.0.50 -j ACCEPT
+
+-N internal-to-local
+-A internal-to-local -j ACCEPT
+
+-N icmp-queue-in
+-A icmp-queue-in -p icmp -m icmp --icmp-type 8 -m state --state NEW -j ACCEPT 
+
+-N udp-queue-in
+-A udp-queue-in -p udp -m udp --dport 53 -j ACCEPT 
+-A udp-queue-in -p udp -m udp --dport 16767 -j ACCEPT
+
+-N tcp-queue-in
+-A tcp-queue-in -j syn-only
+-A tcp-queue-in -j syn-sniffing 
+-A tcp-queue-in -p tcp -m tcp --dport 22 -j ACCEPT 
+-A tcp-queue-in -p tcp -m tcp --dport 8000 -j ACCEPT 
+-A tcp-queue-in -p tcp -m tcp --dport 443 -j ACCEPT 
+-A tcp-queue-in -p tcp -m tcp --dport 80 -j ACCEPT 
+-A tcp-queue-in -p tcp -m tcp --dport 8080 -j ACCEPT 
+-A tcp-queue-in -p tcp -m tcp --dport 16767 -j ACCEPT
+-A tcp-queue-in -p tcp -m tcp --dport 16769 -j ACCEPT
+-A tcp-queue-in -p tcp -m multiport --dports 9000:9010 -j ACCEPT 
+
+-N local-in
+-A local-in -p icmp -j icmp-queue-in 
+-A local-in -p udp  -j udp-queue-in 
+-A local-in -p tcp  -j tcp-queue-in 
+
+-N ip-block
+
+-A INPUT -i lo -j ACCEPT 
+-A INPUT -j ip-block 
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT 
+-A INPUT -d 94.254.39.66 -j local-in
+-A INPUT -s 10.0.0.1/24 -d 10.0.0.1 -j internal-to-local
+-A INPUT -s 10.0.0.1/24 ! -d 10.0.0.1/24 -j internal-to-external
+-A INPUT -s 127.0.0.1 -d 127.0.0.1 -j ACCEPT 
+-A INPUT -j LOGDROP 
+
+-A OUTPUT -j ip-block 
+
+-A FORWARD -m tcp -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -j LOG --log-prefix "FORWARD "

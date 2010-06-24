@@ -1,0 +1,15 @@
+#!/bin/sh
+
+FILE=$0
+[ -L $FILE ] && FILE=`readlink $FILE`
+ROOTDIR=`dirname $FILE`/..
+
+. $ROOTDIR/bin/lib.sh
+
+assert_root;
+
+out_info "Setting up traffic control..."
+$ROOTDIR/bin/setup-tc
+
+out_info "Setting up iptables..."
+$ROOTDIR/bin/setup-iptables

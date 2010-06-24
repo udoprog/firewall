@@ -1,0 +1,7 @@
+VERBOSE=y
+
+TC=/sbin/tc
+TCROOT=$ROOTDIR/tc
+
+IPT=/sbin/iptables
+IPTROOT=$ROOTDIR/iptables

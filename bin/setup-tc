@@ -1,0 +1,30 @@
+#!/bin/sh
+
+FILE=$0
+[ -L $FILE ] && FILE=`readlink $FILE`
+ROOTDIR=`dirname $FILE`/..
+
+. $ROOTDIR/bin/lib.sh
+
+setup_tc() {
+    for DEV in `ls -1 $TCROOT`; do
+        ROOT=$TCROOT/$DEV/root
+        CLASSES=$TCROOT/$DEV/classes
+        
+        [ ! -f $ROOT ] && { continue; }
+        
+        exec_stmt "$TC qdisc del dev $DEV root"
+        
+        exec_stmt "$TC qdisc add dev $DEV root `cat $ROOT`"
+        
+        [ -f $CLASSES ] && {
+            read_conf $CLASSES | while read class_stmt; do
+                exec_stmt "$TC class add dev $DEV $class_stmt"
+            done
+        }
+    done
+}
+
+assert_root;
+
+setup_tc;

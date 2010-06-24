@@ -1,0 +1,4 @@
+-A POSTROUTING -p tcp -d 10.0.0.150 --dport 16767 -j CLASSIFY --set-class 1:50
+-A POSTROUTING -p tcp -d 10.0.0.150 --dport 16769 -j CLASSIFY --set-class 1:50
+-A POSTROUTING -p tcp -d 10.0.0.0/24 --dport 22 -j CLASSIFY --set-class 1:40
+-A POSTROUTING -p tcp -s 81.88.0.3 -d 10.0.0.150 -j CLASSIFY --set-class 1:100

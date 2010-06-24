@@ -1,0 +1,9 @@
+-A PREROUTING -s 10.0.0.0/24 -j ACCEPT
+-A PREROUTING -p udp -m udp --dport 10761 -j DNAT --to-destination 10.0.0.50 
+-A PREROUTING -p udp -m udp --dport 10747 -j DNAT --to-destination 10.0.0.100 
+-A PREROUTING -p tcp -m tcp --dport 10761 -j DNAT --to-destination 10.0.0.50 
+-A PREROUTING -p tcp -m tcp --dport 10747 -j DNAT --to-destination 10.0.0.100 
+-A PREROUTING -p tcp -m tcp --dport 2222 -j DNAT --to-destination :22
+
+-A POSTROUTING -s 10.0.0.1 -j ACCEPT
+-A POSTROUTING -s 10.0.0.0/24 -j SNAT --to-source 94.254.39.66 

@@ -1,0 +1,7 @@
+# setting up tc for traffic shaping filesharing
+# see: iptables/mangle/10tc
+#parent 1:0 classid 1:1 htb rate 1000Mbit
+#parent 1:1 classid 1:10 htb rate 1000Mbit prio 10  ceil 1000Mbit
+#parent 1:1 classid 1:40 htb rate 1000Mbit prio 1   ceil 1000Mbit
+#parent 1:1 classid 1:50 htb rate 1000Mbit prio 100 ceil 1000Mbit
+#parent 1:1 classid 1:100 htb rate 8Mbit prio 100 ceil 8Mbit

@@ -1,0 +1,36 @@
+#!/bin/sh
+
+FILE=$0
+[ -L $FILE ] && FILE=`readlink $FILE`
+ROOTDIR=`dirname $FILE`/..
+
+. $ROOTDIR/bin/lib.sh
+
+clear_iptables() {
+    exec_stmt $IPT -P INPUT   ACCEPT
+    exec_stmt $IPT -P OUTPUT  ACCEPT
+    exec_stmt $IPT -P FORWARD ACCEPT
+    exec_stmt $IPT -F
+    exec_stmt $IPT -X
+
+    for table in filter nat mangle; do
+        exec_stmt $IPT -t $table -F
+        exec_stmt $IPT -t $table -X
+        exec_stmt $IPT -t $table -Z
+    done
+}
+
+setup_iptables() {
+    for TABLE in `ls -1 $IPTROOT`; do
+        for RULES in `ls -1 $IPTROOT/$TABLE`; do
+            read_conf $IPTROOT/$TABLE/$RULES | while read iptables_stmt; do
+                exec_stmt $IPT -t $TABLE $iptables_stmt
+            done
+        done
+    done
+}
+
+assert_root;
+
+clear_iptables;
+setup_iptables;

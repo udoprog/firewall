@@ -1,0 +1,9 @@
+Setup your tc-rules in:
+tc/<if>/root
+tc/<if>/classes
+
+Setup your iptables-rules in:
+iptables/<table>/<commands>
+
+To setup firewall, run:
+bin/setup-iptables
